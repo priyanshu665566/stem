@@ -44,6 +44,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'api',
+    'cities',
+    'rooms',
+    'events',
 ]
 
 MIDDLEWARE = [
@@ -166,8 +169,6 @@ SIMPLE_JWT = {
 }
 
 AUTH_USER_MODEL = 'api.User'
-
-
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'

@@ -7,7 +7,7 @@ import API from './axiosInstance'
  * @returns {Promise}
  */
 export const getAllThumbnails = (page = 1, perPage = 12) =>
-    API.get('/thumbnails/', {
+    API.get('/auth/thumbnails/', {
         params: { page, per_page: perPage }
     })
 
@@ -16,7 +16,7 @@ export const getAllThumbnails = (page = 1, perPage = 12) =>
  * @returns {Promise}
  */
 export const getFeaturedThumbnails = () =>
-    API.get('/thumbnails/featured/')
+    API.get('/auth/thumbnails/featured/')
 
 /**
  * Upload new thumbnail image
@@ -24,7 +24,7 @@ export const getFeaturedThumbnails = () =>
  * @returns {Promise}
  */
 export const createThumbnail = (formData) =>
-    API.post('/thumbnails/create/', formData, {
+    API.post('/auth/thumbnails/create/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
     })
 
@@ -34,7 +34,7 @@ export const createThumbnail = (formData) =>
  * @returns {Promise}
  */
 export const deleteThumbnail = (thumbnailId) =>
-    API.delete(`/thumbnails/${thumbnailId}/delete/`)
+    API.delete(`/auth/thumbnails/${thumbnailId}/delete/`)
 
 /**
  * Toggle featured status of a thumbnail (max 4 featured allowed)
@@ -42,7 +42,7 @@ export const deleteThumbnail = (thumbnailId) =>
  * @returns {Promise}
  */
 export const toggleFeaturedThumbnail = (thumbnailId) =>
-    API.patch(`/thumbnails/${thumbnailId}/feature/`)
+    API.patch(`/auth/thumbnails/${thumbnailId}/feature/`)
 
 /**
  * Update thumbnail details (title, sort_order, etc.)
@@ -51,7 +51,7 @@ export const toggleFeaturedThumbnail = (thumbnailId) =>
  * @returns {Promise}
  */
 export const updateThumbnail = (thumbnailId, data) =>
-    API.patch(`/thumbnails/${thumbnailId}/update/`, data)
+    API.patch(`/auth/thumbnails/${thumbnailId}/update/`, data)
 
 /**
  * Increment usage count when thumbnail is selected
@@ -59,4 +59,4 @@ export const updateThumbnail = (thumbnailId, data) =>
  * @returns {Promise}
  */
 export const incrementThumbnailUsage = (thumbnailId) =>
-    API.patch(`/thumbnails/${thumbnailId}/increment-usage/`)
+    API.patch(`/auth/thumbnails/${thumbnailId}/increment-usage/`)

@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { motion as Motion } from 'framer-motion';
 import Loader3D from '../components/Loader3D';
 import SmartImage from '../components/SmartImage';
 import { getCityBySlug } from '../api/cities';
-
-const NAVBAR_HEIGHT = '50px';
 
 const isVideoUrl = (url) => Boolean(url && /\.(mp4|webm|ogg)(\?.*)?$/i.test(url));
 
@@ -21,7 +18,6 @@ const CityView = () => {
     const fetchCity = async () => {
       setIsLoading(true);
       setError(null);
-
       try {
         const { data } = await getCityBySlug(slug);
         if (isMounted) setCity(data);
@@ -44,8 +40,8 @@ const CityView = () => {
   if (error || !city) {
     return (
       <div style={{
-        height: `calc(100vh - ${NAVBAR_HEIGHT})`,
-        marginTop: NAVBAR_HEIGHT,
+        position: 'fixed',
+        inset: 0,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -67,49 +63,54 @@ const CityView = () => {
   const loopIsVideo = isVideoUrl(loopOriginal);
 
   return (
-    <Motion.div
-      initial={{ opacity: 0, scale: 1.08 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 1, ease: 'easeOut' }}
+    <div
       style={{
         position: 'fixed',
-        top: NAVBAR_HEIGHT,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        height: `calc(100vh - ${NAVBAR_HEIGHT})`,
+        inset: 0,                  // covers navbar too
         width: '100vw',
+        height: '100vh',
         overflow: 'hidden',
         background: '#000',
+        zIndex: 0,
       }}
     >
-      <SmartImage
-        avif={thumbnail?.avif}
-        webp={thumbnail?.webp}
-        fallback={thumbnail?.original}
-        alt={name}
-        loading="eager"
-        priority={true}
-        className=""
-        style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          objectFit: 'fill',
-          objectPosition: 'center center',
-          zIndex: 0,
-        }}
-      />
+      {/* Background image — full bleed, no overlay darkening */}
+      <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              overflow: 'hidden',
+              zIndex: 0,
+            }}
+          >      
+            <SmartImage
+              avif={thumbnail?.avif}
+              webp={thumbnail?.webp}
+              fallback={thumbnail?.original}
+              alt={name}
+              loading="eager"
+              priority={true}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                objectPosition: 'center center',
+                display: 'block',
+                transform: 'scale(1.01)',
+              }}
+            />
+      </div>
 
+      {/* Subtle vignette only at edges — not a flat dark overlay */}
       <div style={{
         position: 'absolute',
         inset: 0,
-        background: 'rgba(0,0,0,0.24)',
+        background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%)',
         pointerEvents: 'none',
         zIndex: 1,
       }} />
 
+      {/* Flyin graphic — top right */}
       {flyin_graphic?.original && (
         <SmartImage
           avif={flyin_graphic.avif}
@@ -130,6 +131,7 @@ const CityView = () => {
         />
       )}
 
+      {/* Loop graphic — top left */}
       {loop_graphic?.original && (
         loopIsVideo ? (
           <video
@@ -149,38 +151,35 @@ const CityView = () => {
             }}
           />
         ) : (
-          <SmartImage
-            avif={loop_graphic.avif}
-            webp={loop_graphic.webp}
-            fallback={loop_graphic.original}
-            alt={`${name} loop graphic`}
-            loading="eager"
-            priority={true}
+          <div
             style={{
               position: 'absolute',
-              left: '2rem',
-              top: '2rem',
-              maxWidth: '45%',
-              maxHeight: '55%',
-              objectFit: 'contain',
-              zIndex: 2,
+              inset: 0,
+              overflow: 'hidden',
+              zIndex: 0,
             }}
-          />
+          >
+            <SmartImage
+              avif={thumbnail?.avif}
+              webp={thumbnail?.webp}
+              fallback={thumbnail?.original}
+              alt={name}
+              loading="eager"
+              priority={true}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center center',
+                display: 'block',
+                transform: 'scale(1.01)',
+              }}
+            />
+          </div>
         )
       )}
 
-      <div style={{
-        position: 'absolute',
-        bottom: '3rem',
-        left: '3rem',
-        zIndex: 3,
-        color: '#ffffff',
-        textShadow: '0 20px 40px rgba(0,0,0,0.45)',
-        maxWidth: '45%',
-      }}>
-        <h1 style={{ fontSize: 'clamp(3rem, 5vw, 5rem)', margin: 0 }}>{name}</h1>
-      </div>
-
+      {/* Audio player — bottom right */}
       {support_audio_url && (
         <div style={{
           position: 'absolute',
@@ -202,7 +201,7 @@ const CityView = () => {
           />
         </div>
       )}
-    </Motion.div>
+    </div>
   );
 };
 

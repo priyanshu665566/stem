@@ -102,7 +102,7 @@ const Home = () => {
                     playsInline
                     onCanPlay={(e) => e.target.play()}
                     style={{
-                        position: 'absolute',
+                        position: 'absolute', 
                         inset: 0,
                         width: '100%',
                         height: '100%',
