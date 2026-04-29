@@ -134,3 +134,68 @@ def get_my_cities(request):
     cities = City.objects.filter(city_manager=request.user).order_by('-created_at')
     serializer = CitySerializer(cities, many=True, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['POST', 'DELETE'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def manage_city_logo(request, city_id):
+    """Upload or delete city logo"""
+    try:
+        city = City.objects.get(id=city_id)
+    except City.DoesNotExist:
+        return Response({'error': 'City not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'POST':
+        # Upload logo
+        if 'logo_original' not in request.FILES:
+            return Response({'error': 'No logo file provided'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        city.logo_original = request.FILES['logo_original']
+        city.save()
+        serializer = CitySerializer(city, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    elif request.method == 'DELETE':
+        # Delete logo
+        from api.image_processor import delete_image_variants
+        delete_image_variants(city.logo_original)
+        delete_image_variants(city.logo_webp)
+        delete_image_variants(city.logo_avif)
+        city.logo_original = None
+        city.logo_webp = None
+        city.logo_avif = None
+        city.save()
+        return Response({'message': 'Logo deleted successfully'}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def get_city_rooms(request, city_id):
+    """Fetch all rooms belonging to a city"""
+    try:
+        city = City.objects.get(id=city_id)
+    except City.DoesNotExist:
+        return Response({'error': 'City not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    from rooms.models import Room
+    from rooms.serializers import RoomSerializer
+    
+    rooms = city.rooms.all().order_by('-created_at')
+    serializer = RoomSerializer(rooms, many=True, context={'request': request})
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['PATCH'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def update_city_navbar_slots(request, city_id):
+    """Update navbar slots (room assignments) for a city"""
+    try:
+        city = City.objects.get(id=city_id)
+    except City.DoesNotExist:
+        return Response({'error': 'City not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    navbar_slots = request.data.get('navbar_slots', {})
+    city.navbar_slots = navbar_slots
+    city.save()
+    serializer = CitySerializer(city, context={'request': request})
+    return Response(serializer.data, status=status.HTTP_200_OK)

@@ -7,19 +7,36 @@ class CitySerializer(serializers.ModelSerializer):
     thumbnail = serializers.SerializerMethodField(read_only=True)
     flyin_graphic = serializers.SerializerMethodField(read_only=True)
     loop_graphic = serializers.SerializerMethodField(read_only=True)
+    logo = serializers.SerializerMethodField(read_only=True)
     support_audio_url = serializers.SerializerMethodField(read_only=True)
+    rooms = serializers.SerializerMethodField(read_only=True)
     thumbnail_original = serializers.ImageField(write_only=True, required=False, allow_null=True)
     flyin_graphic_original = serializers.ImageField(write_only=True, required=False, allow_null=True)
     loop_graphic_original = serializers.ImageField(write_only=True, required=False, allow_null=True)
+    logo_original = serializers.ImageField(write_only=True, required=False, allow_null=True)
     support_audio = serializers.FileField(write_only=True, required=False, allow_null=True)
 
     class Meta:
         model = City
         fields = [
             'id', 'name', 'assistant', 'meeting_url', 'status', 'content_creator_id',
-            'city_manager', 'is_active', 'thumbnail', 'flyin_graphic', 'loop_graphic',
+            'city_manager', 'is_active', 'thumbnail', 'flyin_graphic', 'loop_graphic', 'logo',
             'support_audio_url', 'thumbnail_original', 'flyin_graphic_original',
-            'loop_graphic_original', 'support_audio', 'slug', 'created_at'
+            'loop_graphic_original', 'logo_original', 'support_audio', 'slug', 'created_at', 'navbar_slots',
+            'rooms'
+        ]
+
+    def get_rooms(self, obj):
+        """Return rooms associated with this city"""
+        request = self.context.get('request')
+        rooms = obj.rooms.all()
+        
+        return [
+            {
+                'id': room.id,
+                'room_name': room.room_name,
+            }
+            for room in rooms
         ]
 
     def get_thumbnail(self, obj):
@@ -64,6 +81,23 @@ class CitySerializer(serializers.ModelSerializer):
             'original': request.build_absolute_uri(obj.loop_graphic_original.url) if request and obj.loop_graphic_original else None,
             'webp': request.build_absolute_uri(obj.loop_graphic_webp.url) if request and obj.loop_graphic_webp else None,
             'avif': request.build_absolute_uri(obj.loop_graphic_avif.url) if request and obj.loop_graphic_avif else None,
+        }
+
+    def get_logo(self, obj):
+        """Return logo in original, webp, and avif formats"""
+        if not obj.logo_original:
+            return {
+                'original': None,
+                'webp': None,
+                'avif': None,
+            }
+        
+        request = self.context.get('request')
+        
+        return {
+            'original': request.build_absolute_uri(obj.logo_original.url) if request and obj.logo_original else None,
+            'webp': request.build_absolute_uri(obj.logo_webp.url) if request and obj.logo_webp else None,
+            'avif': request.build_absolute_uri(obj.logo_avif.url) if request and obj.logo_avif else None,
         }
 
     def get_support_audio_url(self, obj):

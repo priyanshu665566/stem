@@ -46,6 +46,15 @@ class City(models.Model):
     # Support Audio - raw file (no variants)
     support_audio = models.FileField(upload_to='city_support_audios/', null=True, blank=True)
     
+    # Logo - original, webp, avif variants
+    logo_original = models.ImageField(upload_to='city_logos/', null=True, blank=True)
+    logo_webp = models.ImageField(upload_to='city_logos/webp/', null=True, blank=True)
+    logo_avif = models.ImageField(upload_to='city_logos/avif/', null=True, blank=True)
+    
+    # Navbar slots - stores room assignments for the 7 navbar buttons
+    # Structure: {1: room_id, 2: room_id, ...} or empty if not assigned
+    navbar_slots = models.JSONField(default=dict, blank=True)
+    
     slug = models.SlugField(max_length=255, unique=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -70,6 +79,7 @@ class City(models.Model):
             ('thumbnail_original', 'thumbnail_webp', 'thumbnail_avif', 'city_thumbnails', 'thumbnail'),
             ('flyin_graphic_original', 'flyin_graphic_webp', 'flyin_graphic_avif', 'city_flyin_graphics', 'flyin'),
             ('loop_graphic_original', 'loop_graphic_webp', 'loop_graphic_avif', 'city_loop_graphics', 'loop'),
+            ('logo_original', 'logo_webp', 'logo_avif', 'city_logos', 'logo'),
         ]
         for original_attr, webp_attr, avif_attr, base_dir, base_name in variant_fields:
             try:
@@ -97,6 +107,9 @@ class City(models.Model):
         delete_image_variants(self.loop_graphic_original)
         delete_image_variants(self.loop_graphic_webp)
         delete_image_variants(self.loop_graphic_avif)
+        delete_image_variants(self.logo_original)
+        delete_image_variants(self.logo_webp)
+        delete_image_variants(self.logo_avif)
         
         # Delete audio file
         if self.support_audio:

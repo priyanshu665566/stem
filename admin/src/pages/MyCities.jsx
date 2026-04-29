@@ -13,7 +13,7 @@ export default function MyCities() {
     const navigate = useNavigate();
     const BASE_URL = "http://localhost:8000/";
     const { isContentCreator } = useAuth();
-
+    const token = localStorage.getItem('accessToken');
     const { isDark } = useTheme();
     const [cities, setCities] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -386,7 +386,10 @@ export default function MyCities() {
                                                     <ActionButton
                                                         icon={CodeXml}
                                                         color={buttonStyle.mapper}
-                                                        title="City Mapper (Coming Soon)"
+                                                        onClick={() => 
+                                                            window.open(`http://localhost:5174/city-mapper/${city.id}?token=${token}`, '_blank')
+                                                        }
+                                                        title="City Mapper"
                                                     />
                                                     <ActionButton
                                                         icon={Component}
