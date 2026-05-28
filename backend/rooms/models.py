@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models # pyright: ignore[reportMissingModuleSource]
 
 from api.image_processor import delete_image_variants
 from api.models import User, _process_variant_image

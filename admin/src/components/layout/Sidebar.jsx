@@ -228,7 +228,7 @@ export default function Sidebar({ setMobileOpen }) {
                             className="text-[10px]"
                             style={{ color: textSecondary, opacity: 0.5 }}
                         >
-                            v1.0
+                            stemcity
                         </span>
                     )}
                 </div>

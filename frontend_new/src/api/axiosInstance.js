@@ -25,4 +25,28 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // If we get a 401 Unauthorized
+    if (error.response?.status === 401) {
+      const token = localStorage.getItem('accessToken');
+      
+      // Only clear if token exists (to avoid infinite loop)
+      if (token && !error.config.__isRetry) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        
+        // Mark this as a retry to prevent infinite loops
+        error.config.__isRetry = true;
+        
+        // Remove the invalid token and retry
+        delete error.config.headers['Authorization'];
+        return API(error.config);
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default API;
